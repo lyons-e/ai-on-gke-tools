@@ -55,8 +55,8 @@ type Request struct {
 	GCSPath               string
 	MachineType           string
 	DiskType              string
-	BuildDiskSizeGB       int64 // Size of build disk for containerd working space
-	SecondaryDiskSizeGB   int64 // Size of secondary disk (final image size)
+	DiskSizeGB            int64 // Size of disk for building/unpacking images
+	OutputDiskSizeGB      int64 // Size of output disk image (defaults to DiskSizeGB if not set)
 	GCPOAuth              string
 	Network               string
 	Subnet                string
@@ -157,7 +157,7 @@ func GenerateDiskImage(ctx context.Context, req Request) error {
 					Disk: compute.Disk{
 						Name:   fmt.Sprintf("%s-disk", req.JobName),
 						Type:   req.DiskType,
-						SizeGb: req.SecondaryDiskSizeGB,
+						SizeGb: req.OutputDiskSizeGB,
 					},
 				},
 			},
@@ -197,7 +197,7 @@ func GenerateDiskImage(ctx context.Context, req Request) error {
 									DeviceName: fmt.Sprintf("%s-bootable-disk", req.JobName),
 									Mode:       "READ_WRITE",
 									InitializeParams: &compute.AttachedDiskInitializeParams{
-										DiskSizeGb:  req.BuildDiskSizeGB,
+										DiskSizeGb:  req.DiskSizeGB,
 										DiskType:    fmt.Sprintf("projects/%s/zones/%s/diskTypes/%s", req.ProjectName, req.Zone, req.DiskType),
 										SourceImage: "projects/debian-cloud/global/images/debian-11-bullseye-v20230912",
 									},
@@ -205,7 +205,7 @@ func GenerateDiskImage(ctx context.Context, req Request) error {
 								&compute.AttachedDisk{
 									AutoDelete: true,
 									Boot:       false,
-									DiskSizeGb: req.SecondaryDiskSizeGB,
+									DiskSizeGb: req.OutputDiskSizeGB,
 									DeviceName: deviceName,
 									Source:     fmt.Sprintf("%s-disk", req.JobName),
 								},
@@ -299,7 +299,7 @@ func VerifyDiskImage(ctx context.Context, req Request) error {
 					Disk: compute.Disk{
 						Name:   fmt.Sprintf("%s-disk", req.JobName),
 						Type:   req.DiskType,
-						SizeGb: req.SecondaryDiskSizeGB,
+						SizeGb: req.OutputDiskSizeGB,
 						// Use the image to be verified to create a disk.
 						SourceImage: req.ImageName,
 					},
@@ -333,7 +333,7 @@ func VerifyDiskImage(ctx context.Context, req Request) error {
 									DeviceName: fmt.Sprintf("%s-bootable-disk", req.JobName),
 									Mode:       "READ_WRITE",
 									InitializeParams: &compute.AttachedDiskInitializeParams{
-										DiskSizeGb:  req.BuildDiskSizeGB,
+										DiskSizeGb:  req.DiskSizeGB,
 										DiskType:    fmt.Sprintf("projects/%s/zones/%s/diskTypes/%s", req.ProjectName, req.Zone, req.DiskType),
 										SourceImage: "projects/debian-cloud/global/images/debian-11-bullseye-v20230912",
 									},
@@ -341,7 +341,7 @@ func VerifyDiskImage(ctx context.Context, req Request) error {
 								&compute.AttachedDisk{
 									AutoDelete: true,
 									Boot:       false,
-									DiskSizeGb: req.SecondaryDiskSizeGB,
+									DiskSizeGb: req.OutputDiskSizeGB,
 									DeviceName: deviceName,
 									Source:     fmt.Sprintf("%s-disk", req.JobName),
 								},

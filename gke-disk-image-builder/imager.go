@@ -65,6 +65,7 @@ type Request struct {
 	Timeout               time.Duration
 	ImagePullAuth         ImagePullAuthMechanism
 	ImageLabels           []string
+	ImageDescription      string
 	ServiceAccount        string
 	StoreSnapshotCheckSum bool
 }
@@ -253,6 +254,7 @@ func GenerateDiskImage(ctx context.Context, req Request) error {
 							SourceDisk:       fmt.Sprintf("%s-disk", req.JobName),
 							Family:           req.ImageFamilyName,
 							Labels:           imageLabels,
+							Description:      req.ImageDescription,
 							StorageLocations: req.StorageLocations,
 						},
 					},

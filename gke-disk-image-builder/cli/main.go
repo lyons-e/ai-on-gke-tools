@@ -64,6 +64,7 @@ func main() {
 	subnet := flag.String("subnet", "default", "subnet to be used by GCE resources used for disk image creation.")
 	storeSnapshotCheckSum := flag.Bool("store-snapshot-checksum", true, "calculate and store checksums of every snapshot directory.")
 	verifyOnly := flag.Bool("verify-only", false, "Only verifies the disk image provided in image-name, and does not generate any image.")
+	imageDescription := flag.String("image-description", "", "description stored on the disk image.")
 	flag.Var(&imageLabels, "image-labels", "labels tagged to the disk image. This flag can be specified multiple times. The accepted format is `--image-labels=key=val`.")
 	flag.Var(&containerImages, "container-image", "container image to include in the disk image. This flag can be specified multiple times")
 	flag.Var(&storageLocations, "storage-location", "The location to store the final image. If left blank, Compute Engine stores your image in the multi-region closest to the image source. This flag can be specified multiple times")
@@ -127,6 +128,7 @@ func main() {
 		Timeout:               td,
 		ImagePullAuth:         auth,
 		ImageLabels:           imageLabels,
+		ImageDescription:      *imageDescription,
 		StoreSnapshotCheckSum: *storeSnapshotCheckSum,
 	}
 
